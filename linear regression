@@ -1,0 +1,31 @@
+import numpy as np
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+
+# Generate random data for demonstration
+np.random.seed(42)
+X = 2 * np.random.rand(100, 1)  # Generate 100 random feature values
+y = 4 + 3 * X + np.random.rand(100, 1)  # Linear relationship with some noise
+
+# Create a Linear Regression model
+lr_model = LinearRegression()
+
+# Fit the model to the data
+lr_model.fit(X, y)
+
+# Make predictions
+X_new = np.array([[0], [2]])  # New data points for prediction
+y_pred = lr_model.predict(X_new)
+
+# Plot the data and the linear regression line
+plt.scatter(X, y, alpha=0.6, label='Data')
+plt.plot(X_new, y_pred, 'r-', label='Linear Regression')
+plt.xlabel('Feature')
+plt.ylabel('Target')
+plt.legend()
+plt.title('Linear Regression')
+plt.show()
+
+# Display the coefficients and intercept of the linear regression model
+print('Coefficients:', lr_model.coef_)
+print('Intercept:', lr_model.intercept_)
