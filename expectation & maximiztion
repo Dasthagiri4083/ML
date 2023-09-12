@@ -1,0 +1,24 @@
+import numpy as np
+
+# Generate synthetic data
+np.random.seed(0)
+data = np.random.normal(5, 2, size=100)
+
+# Initialize parameters (mean and standard deviation)
+mu = 7.0
+sigma = 1.0
+
+# EM algorithm
+num_iterations = 100
+for i in range(num_iterations):
+    # Expectation step: Compute the probability of each data point belonging to the distribution
+    pdf = (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((data - mu) / sigma) ** 2)
+    responsibilities = pdf / pdf.sum()
+
+    # Maximization step: Update the parameters based on the responsibilities
+    mu = np.sum(responsibilities * data) / np.sum(responsibilities)
+    sigma = np.sqrt(np.sum(responsibilities * (data - mu) ** 2) / np.sum(responsibilities))
+
+# Print the estimated parameters
+print("Estimated Mean (mu):", mu)
+print("Estimated Standard Deviation (sigma):", sigma)
