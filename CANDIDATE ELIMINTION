@@ -1,0 +1,46 @@
+# Define the attributes and training data
+attributes = ['Sky', 'AirTemp', 'Humidity', 'Wind', 'Water']
+data = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm'],
+    ['Rainy', 'Cold', 'High', 'Weak', 'Warm'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool']
+]
+
+# Initialize the version space with the most specific and most general hypotheses
+def initialize_version_space(attributes):
+    specific_hypothesis = ['0' for _ in attributes]
+    general_hypothesis = ['?' for _ in attributes]
+    return specific_hypothesis, general_hypothesis
+
+# Check if an example is consistent with a hypothesis
+def is_consistent(hypothesis, example):
+    for i in range(len(hypothesis)):
+        if hypothesis[i] != '?' and hypothesis[i] != example[i]:
+            return False
+    return True
+
+# Refine the specific and general hypotheses based on a positive example
+def refine_hypotheses(specific_hypothesis, general_hypothesis, example):
+    for i in range(len(specific_hypothesis)):
+        if example[i] != specific_hypothesis[i]:
+            specific_hypothesis[i] = '?'
+            general_hypothesis[i] = example[i]
+    return specific_hypothesis, general_hypothesis
+
+# Main Candidate-Elimination algorithm
+def candidate_elimination(attributes, data):
+    specific_hypothesis, general_hypothesis = initialize_version_space(attributes)
+    
+    for example in data:
+        # In this simplified example, we assume all examples are positive.
+        specific_hypothesis, general_hypothesis = refine_hypotheses(specific_hypothesis, general_hypothesis, example)
+    
+    return specific_hypothesis, general_hypothesis
+
+# Apply the Candidate-Elimination algorithm
+specific_hypothesis, general_hypothesis = candidate_elimination(attributes, data)
+
+# Output the results
+print("Specific Hypothesis:", specific_hypothesis)
+print("General Hypothesis:", general_hypothesis)
