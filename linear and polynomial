@@ -1,0 +1,41 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+
+# Generate synthetic data
+np.random.seed(0)
+X = np.sort(5 * np.random.rand(80, 1), axis=0)
+y = np.sin(X).ravel() + np.random.normal(0, 0.1, X.shape[0])
+
+# Split the data into training and test sets
+X_train, X_test = X[:60], X[60:]
+y_train, y_test = y[:60], y[60:]
+
+# Linear Regression
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+lr_y_pred = lr_model.predict(X_test)
+lr_mse = mean_squared_error(y_test, lr_y_pred)
+
+# Polynomial Regression
+degree = 5  # Degree of the polynomial
+poly_features = PolynomialFeatures(degree=degree)
+X_poly = poly_features.fit_transform(X_train)
+poly_model = LinearRegression()
+poly_model.fit(X_poly, y_train)
+
+X_test_poly = poly_features.transform(X_test)
+poly_y_pred = poly_model.predict(X_test_poly)
+poly_mse = mean_squared_error(y_test, poly_y_pred)
+
+# Plot the results
+plt.scatter(X, y, s=20, label='Data')
+plt.plot(X_test, lr_y_pred, label=f'Linear Regression (MSE={lr_mse:.2f})', color='red')
+plt.plot(X_test, poly_y_pred, label=f'Polynomial Regression (Degree={degree}, MSE={poly_mse:.2f})', color='green')
+plt.xlabel('X')
+plt.ylabel('y')
+plt.legend()
+plt.title('Linear vs. Polynomial Regression')
+plt.show()
