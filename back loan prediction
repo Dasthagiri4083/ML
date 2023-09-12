@@ -1,0 +1,42 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, classification_report
+
+# Generate synthetic bank loan data
+data = {
+    'Income': [45000, 60000, 35000, 55000, 40000, 80000, 75000, 90000],
+    'Credit_Score': [700, 750, 600, 700, 650, 800, 780, 820],
+    'Employment_Status': ['Employed', 'Employed', 'Unemployed', 'Employed', 'Employed', 'Employed', 'Self-Employed', 'Employed'],
+    'Loan_Status': ['Approved', 'Approved', 'Not Approved', 'Approved', 'Not Approved', 'Approved', 'Approved', 'Approved']
+}
+
+# Create a DataFrame from the generated data
+df = pd.DataFrame(data)
+
+# Perform one-hot encoding for the 'Employment_Status' column
+df = pd.get_dummies(df, columns=['Employment_Status'], drop_first=True)
+
+# Split the data into features (X) and the target variable (y)
+X = df.drop('Loan_Status', axis=1)  # Features (excluding the 'Loan_Status' column)
+y = df['Loan_Status']  # Target variable (Loan approval status)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Gaussian Naive Bayes classifier
+naive_bayes_classifier = GaussianNB()
+
+# Train the classifier on the training data
+naive_bayes_classifier.fit(X_train, y_train)
+
+# Make predictions on the testing data
+y_pred = naive_bayes_classifier.predict(X_test)
+
+# Calculate accuracy and display a classification report
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Classification Report:")
+print(report)
