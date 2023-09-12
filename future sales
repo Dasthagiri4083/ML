@@ -1,0 +1,44 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+
+# Generate synthetic sales data for demonstration (you can replace this with your data)
+np.random.seed(0)
+dates = pd.date_range(start="2023-01-01", end="2023-12-31", freq='D')
+sales = np.random.randint(50, 200, size=len(dates))
+
+# Create a DataFrame from the generated data
+data = pd.DataFrame({'Date': dates, 'Sales': sales})
+
+# Set 'Date' as the index of the DataFrame
+data.set_index('Date', inplace=True)
+
+# Split the data into training and testing sets
+train_size = int(len(data) * 0.8)
+train_data, test_data = data[:train_size], data[train_size:]
+
+# Create and fit an ARIMA model
+model = ARIMA(train_data['Sales'], order=(5, 1, 0))  # You can adjust the order
+model_fit = model.fit()
+
+# Make predictions on the test data
+predictions = model_fit.forecast(steps=len(test_data))
+
+# Calculate Mean Absolute Error (MAE)
+mae = np.mean(np.abs(predictions.values - test_data['Sales'].values))
+
+# Plot the original data and predictions
+plt.figure(figsize=(12, 6))
+plt.plot(test_data.index, test_data['Sales'], label='Actual Sales', color='blue')
+plt.plot(test_data.index, predictions, label='Predicted Sales', color='red')
+plt.legend()
+plt.title(f'ARIMA Sales Prediction (MAE={mae:.2f})')
+plt.show()
+
+# You can use the trained model to predict future sales as well
+future_steps = 30  # Adjust the number of future steps
+future_predictions = model_fit.forecast(steps=future_steps)
+
+print("Future Sales Predictions:")
+print(future_predictions)
