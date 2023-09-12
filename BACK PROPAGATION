@@ -1,0 +1,83 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the sigmoid activation function and its derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# Sample dataset (XOR problem)
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [1], [1], [0]])
+
+# Define the neural network architecture
+input_size = 2
+hidden_size = 4
+output_size = 1
+
+# Initialize weights with random values
+np.random.seed(42)
+weights_input_hidden = np.random.uniform(size=(input_size, hidden_size))
+weights_hidden_output = np.random.uniform(size=(hidden_size, output_size))
+
+# Set learning rate and number of training iterations
+learning_rate = 0.1
+iterations = 10000
+
+# Lists to store the loss values during training
+loss_history = []
+
+# Training the neural network using backpropagation
+for i in range(iterations):
+    # Forward propagation
+    hidden_layer_input = np.dot(X, weights_input_hidden)
+    hidden_layer_output = sigmoid(hidden_layer_input)
+
+    output_layer_input = np.dot(hidden_layer_output, weights_hidden_output)
+    output_layer_output = sigmoid(output_layer_input)
+
+    # Calculate the error
+    error = y - output_layer_output
+    loss = np.mean(np.abs(error))
+    loss_history.append(loss)
+
+    # Backpropagation
+    d_output = error * sigmoid_derivative(output_layer_output)
+    error_hidden_layer = d_output.dot(weights_hidden_output.T)
+    d_hidden_layer = error_hidden_layer * sigmoid_derivative(hidden_layer_output)
+
+    # Update weights
+    weights_hidden_output += hidden_layer_output.T.dot(d_output) * learning_rate
+    weights_input_hidden += X.T.dot(d_hidden_layer) * learning_rate
+
+# Testing the trained neural network
+test_input = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+predicted_output = sigmoid(np.dot(sigmoid(np.dot(test_input, weights_input_hidden)), weights_hidden_output))
+
+# Plot the training loss over iterations
+plt.plot(range(iterations), loss_history)
+plt.xlabel("Iterations")
+plt.ylabel("Loss")
+plt.title("Training Loss Over Iterations")
+plt.show()
+
+# Plot the decision boundary
+x_min, x_max = -0.5, 1.5
+y_min, y_max = -0.5, 1.5
+xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
+grid_input = np.c_[xx.ravel(), yy.ravel()]
+grid_output = sigmoid(np.dot(sigmoid(np.dot(grid_input, weights_input_hidden)), weights_hidden_output))
+grid_output = grid_output.reshape(xx.shape)
+
+plt.contourf(xx, yy, grid_output, cmap=plt.cm.RdBu, alpha=0.8)
+plt.scatter(X[:, 0], X[:, 1], c=np.ravel(y), cmap=plt.cm.RdBu, edgecolors='k')
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Decision Boundary")
+plt.show()
+
+# Print the predictions
+print("Predicted Output:")
+print(predicted_output)
