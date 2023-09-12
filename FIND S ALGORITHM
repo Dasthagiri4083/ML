@@ -1,0 +1,31 @@
+# Define the initial most specific hypothesis
+def initialize_hypothesis(attributes):
+    return ['?' for _ in attributes]
+
+# Update the hypothesis based on a positive example
+def find_s_algorithm(hypothesis, example):
+    for i in range(len(hypothesis)):
+        if hypothesis[i] == '?':
+            hypothesis[i] = example[i]
+        elif hypothesis[i] != example[i]:
+            hypothesis[i] = '?'
+    return hypothesis
+
+# Sample dataset with attributes and positive examples
+attributes = ['Sky', 'AirTemp', 'Humidity', 'Wind', 'Water', 'Forecast']
+data = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same'],
+    ['Rainy', 'Cold', 'High', 'Weak', 'Warm', 'Change'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change']
+]
+
+# Initialize the hypothesis
+hypothesis = initialize_hypothesis(attributes)
+
+# Apply the FIND-S algorithm to update the hypothesis
+for example in data:
+    hypothesis = find_s_algorithm(hypothesis, example)
+
+# Print the final most specific hypothesis
+print("Final Most Specific Hypothesis:", hypothesis)
