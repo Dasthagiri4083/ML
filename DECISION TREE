@@ -1,0 +1,116 @@
+import math
+
+# Sample dataset
+data = [
+    {'Outlook': 'Sunny', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'No'},
+    {'Outlook': 'Sunny', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Strong', 'PlayTennis': 'No'},
+    {'Outlook': 'Overcast', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Strong', 'PlayTennis': 'No'},
+    {'Outlook': 'Overcast', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Strong', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Sunny', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'No'},
+    {'Outlook': 'Sunny', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Mild', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Sunny', 'Temperature': 'Mild', 'Humidity': 'Normal', 'Wind': 'Strong', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Overcast', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Strong', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Overcast', 'Temperature': 'Hot', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Strong', 'PlayTennis': 'No'}
+]
+
+# Define attribute names
+attributes = ['Outlook', 'Temperature', 'Humidity', 'Wind']
+
+# Define the target attribute
+target_attribute = 'PlayTennis'
+
+# Function to calculate entropy
+def entropy(data, target_attribute):
+    labels = [entry[target_attribute] for entry in data]
+    label_counts = {}
+    entropy_value = 0.0
+    total_instances = len(data)
+
+    for label in labels:
+        if label in label_counts:
+            label_counts[label] += 1
+        else:
+            label_counts[label] = 1
+
+    for label_count in label_counts.values():
+        probability = label_count / total_instances
+        entropy_value -= probability * math.log2(probability)
+
+    return entropy_value
+
+# Function to calculate information gain
+def information_gain(data, attribute, target_attribute):
+    attribute_values = set([entry[attribute] for entry in data])
+    total_instances = len(data)
+    weighted_entropy = 0.0
+
+    for value in attribute_values:
+        subset = [entry for entry in data if entry[attribute] == value]
+        subset_entropy = entropy(subset, target_attribute)
+        weighted_entropy += (len(subset) / total_instances) * subset_entropy
+
+    return entropy(data, target_attribute) - weighted_entropy
+
+# Function to select the best attribute to split on
+def select_best_attribute(data, attributes, target_attribute):
+    information_gains = {}
+
+    for attribute in attributes:
+        if attribute != target_attribute:
+            information_gains[attribute] = information_gain(data, attribute, target_attribute)
+
+    return max(information_gains, key=information_gains.get)
+
+# Function to build the ID3 decision tree
+def build_id3_tree(data, attributes, target_attribute):
+    labels = [entry[target_attribute] for entry in data]
+
+    # If all instances have the same label, return a leaf node with that label
+    if len(set(labels)) == 1:
+        return labels[0]
+
+    # If there are no attributes left to split, return the most common label
+    if len(attributes) == 0:
+        most_common_label = max(set(labels), key=labels.count)
+        return most_common_label
+
+    # Select the best attribute to split on
+    best_attribute = select_best_attribute(data, attributes, target_attribute)
+    tree = {best_attribute: {}}
+    attribute_values = set([entry[best_attribute] for entry in data])
+
+    # Recursively build subtrees for each attribute value
+    for value in attribute_values:
+        subset = [entry for entry in data if entry[best_attribute] == value]
+        subset_attributes = [attr for attr in attributes if attr != best_attribute]
+        tree[best_attribute][value] = build_id3_tree(subset, subset_attributes, target_attribute)
+
+    return tree
+
+# Build the ID3 decision tree
+decision_tree = build_id3_tree(data, attributes, target_attribute)
+
+# Function to classify a new sample using the decision tree
+def classify_sample(sample, tree):
+    attribute = list(tree.keys())[0]
+    value = sample[attribute]
+    if value in tree[attribute]:
+        if isinstance(tree[attribute][value], dict):
+            return classify_sample(sample, tree[attribute][value])
+        else:
+            return tree[attribute][value]
+    else:
+        # If the attribute value is not found in the tree, return a default label
+        return "Unknown"
+
+# Example new sample to classify
+new_sample = {'Outlook': 'Sunny', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Weak'}
+
+# Classify the new sample using the decision tree
+classification_result = classify_sample(new_sample, decision_tree)
+print("Classification result:", classification_result)
